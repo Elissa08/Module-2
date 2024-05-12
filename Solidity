@@ -1,0 +1,49 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.9;
+contract Assessment{
+    address payable public cruz;
+    uint256 public money;
+
+    event Deposit(uint256 amount);
+    event Withdraw(uint256 amount);
+
+    constructor(uint initmoney) payable {
+        cruz = payable(msg.sender);
+        money = initmoney;
+    }
+
+    function getBalance() public view returns(uint256){
+        return money;
+    }
+
+    function deposit(uint256 _amount) public payable {
+        uint _previousBalance = money;
+
+        require(msg.sender == cruz, "You are not the owner of this account!");
+
+        money += _amount;
+
+        assert(money == _previousBalance + _amount);
+
+        emit Deposit(_amount);
+    }
+
+    error InsufficientBalance(uint256 balance, uint256 withdrawAmount);
+
+    function withdraw(uint256 _withdrawAmount) public {
+        require(msg.sender == cruz, "You are not the owner of this account!");
+        uint _previousBalance = money;
+        if (money < _withdrawAmount) {
+            revert InsufficientBalance({
+                balance: money,
+                withdrawAmount: _withdrawAmount
+            });
+        }
+
+        money -= _withdrawAmount;
+
+        assert(money == (_previousBalance - _withdrawAmount));
+
+        emit Withdraw(_withdrawAmount);
+    }
+}
